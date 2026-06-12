@@ -26,7 +26,7 @@ This project applies machine learning to the Wisconsin Diagnostic Breast Cancer 
 
 ## Problem Statement
 
-Breast cancer diagnosis often relies on manual interpretation of cell features, which can be prone to human errors and time consuming. This project evaluates some machine learning algorithms to determine which model most accurately and reliably predicts tumor malignancy using measurable features extracted from digitized breast tissue images.
+Breast cancer diagnosis often relies on manual interpretation of cell features, which can be prone to human errors and time consuming. This project evaluates some machine learning algorithms to determine which model most accurately and reliably predicts tumor malignancy using measurable features extracted from digitized breast tissue images, which are the microscope images of breast tissue that were converted to numerical measurements.
 
 ------------------------------------------------------------------------
 
