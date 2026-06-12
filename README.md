@@ -6,15 +6,25 @@
 
 ## Installation
 
-1.  To reproduce this analysis:
+1.  To reproduce this analysis, install the required packagesin R: "tidyverse", caret", "e1071, "randomForest", "pROC" and "rprojroot"
 
-- Install the required R packages: tidyverse"", "caret, "e1071, "randomForest"", "pROC"" and "rprojroot""
+- Use this R code:
 
-2.  Clone the repository: git clone <https://github.com/dani-loya/BreastCancer-Predictive-Model.git>
+  install.packages(c( "tidyverse", "caret", "e1071", "randomForest", "pROC", "rprojroot" ))
 
-- Open the R project: BreastCancer-Predictive-Model.Rproj
+2.  Clone the repository:
 
-- Open the analysis file: scripts/WBC_analysis.Rmd
+- Go to your terminal and type:
+
+  git clone <https://github.com/dani-loya/BreastCancer-Predictive-Model.git>
+
+3.  Open the project:
+
+- Open BreastCancer-Predictive-Model.Rproj
+
+- Open scripts/WBC_analysis.Rmd
+
+- Run all chunks to reproduce this analysis
 
 ------------------------------------------------------------------------
 
