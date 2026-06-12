@@ -4,7 +4,6 @@
 
 <img src="images/WBC.png" width="600"/>
 
-
 ## Installation
 
 1.  To reproduce this analysis:
@@ -58,5 +57,6 @@ link for final video presentation will be added here
 ## References
 
 - UCI Machine Learning Repository: Wisconsin Diagnostic Breast Cancer Dataset\
-  Wolberg, W., Mangasarian, O., Street, N., & Street, W. (1993). Breast Cancer Wisconsin (Diagnostic) [Dataset]. UCI Machine Learning Repository.https://doi.org/10.24432/C5DW2B
+  Wolberg, W., Mangasarian, O., Street, N., & Street, W. (1993). Breast Cancer Wisconsin (Diagnostic) [Dataset]. UCI Machine Learning Repository.<https://doi.org/10.24432/C5DW2B/>\
+- Classification methods: logistic regression, K‑nearest neighbors, support vector machines, and ensemble models.\
   Hastie, Tibshirani, & Friedman — The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Springer.<https://hastie.su.domains/ElemStatLearn/>
