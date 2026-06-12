@@ -32,18 +32,18 @@ Breast cancer diagnosis often relies on manual interpretation of cell features, 
 
 ## Goals
 
-- Build a reproducible machine‑learning workflow for breast cancer classification\
-- Explore and visualize key predictors that differentiate benign and malignant tumors\
-- Train multiple classification models and compare their performance\
-- Identify the most important features contributing to diagnostic accuracy\
+- Build a reproducible machine‑learning workflow for breast cancer classification
+- Explore and visualize key predictors that differentiate benign and malignant tumors
+- Train multiple classification models and compare their performance
+- Identify the most important features contributing to diagnostic accuracy
 - Produce a clear, well‑documented analysis suitable for academic or professional review
 
 ## Non‑Goals
 
-- Developing a clinical‑grade diagnostic tool\
-- Deploying a real‑time prediction system or web application\
-- Performing deep learning or neural network modeling\
-- Collecting new medical data or conducting clinical trials\
+- Developing a clinical‑grade diagnostic tool
+- Deploying a real‑time prediction system or web application
+- Performing deep learning or neural network modeling
+- Collecting new medical data or conducting clinical trials
 - Providing medical advice or treatment recommendations
 
 ------------------------------------------------------------------------
@@ -57,6 +57,6 @@ link for final video presentation will be added here
 ## References
 
 - UCI Machine Learning Repository: Wisconsin Diagnostic Breast Cancer Dataset\
-  Wolberg, W., Mangasarian, O., Street, N., & Street, W. (1993). Breast Cancer Wisconsin (Diagnostic) [Dataset]. UCI Machine Learning Repository.<https://doi.org/10.24432/C5DW2B/>\
+  Wolberg, W., Mangasarian, O., Street, N., & Street, W. (1993). Breast Cancer Wisconsin (Diagnostic) [Dataset]. UCI Machine Learning Repository.<https://doi.org/10.24432/C5DW2B/>
 - Classification methods: logistic regression, K‑nearest neighbors, support vector machines, and ensemble models.\
   Hastie, Tibshirani, & Friedman — The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Springer.<https://hastie.su.domains/ElemStatLearn/>
