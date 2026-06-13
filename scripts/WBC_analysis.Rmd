@@ -1,1 +1,228 @@
+---
+title: "Breast Cancer Predictive Modeling"
+author: "Danitza Loya"
+output:
+  pdf_document: default
+  html_document: default
+---
 
+**Introduction**
+
+Using the Wisconsin Diagnostic Breast Cancer dataset which contains 30 numeric features taken mathematically from digitized images. With built predictive models, we aim to classify "beningn" and "malignant" tumors. Our goal is to compare logistic regression, K-Nearest Neighbors, Support Vector Machine and Random Forest machine-learning models to evaluate their accuracy and error types.
+
+```{r setup, include=FALSE}
+# This code is to ensure kniting used the correct root for the project
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+getwd()
+list.files()
+list.files("data")
+
+```
+
+```{r}
+# Load libraries
+library(tidyverse)
+library(caret)
+library(e1071)
+library(randomForest)
+library(pROC)
+
+# Load dataset
+bc <- read.csv("data/wdbc.data", header = FALSE)
+
+# Assign column names
+colnames(bc) <- c("ID", "Diagnosis", paste0(rep(c("radius","texture","perimeter","area",
+                                                  "smoothness","compactness","concavity",
+                                                  "concave_points","symmetry","fractal_dim"), 
+                                                each = 3),
+                                            rep(c("_mean","_se","_worst"), 10)))
+
+# Convert diagnosis to factor
+bc$Diagnosis <- factor(bc$Diagnosis, levels = c("B","M"))
+```
+
+```{r}
+# Train / test split
+set.seed(123)
+train_index <- createDataPartition(bc$Diagnosis, p = 0.8, list = FALSE)
+train <- bc[train_index, ]
+test  <- bc[-train_index, ]
+
+```
+
+**Dataset Description**
+
+The Wisconsin Diagnostic Breast Cancer dataset has 569 observations and features such as ID column, diagnosis and tumor characteristics summing 32 variables. For this, every feature is measured with mean, standard error and "worst". The vast majority of the cases are benign (357 benign, 212 malignant) which indicates that sensitivity will be a crucial metric in this dataset. With machine-learning models, we will be able to distinguish malignant from beningn models.
+
+```{r}
+# Pre-processing
+# Scale numeric features ( KNN and SVM)
+numeric_features <- names(train)[!names(train) %in% c("ID", "Diagnosis")]
+
+preproc <- preProcess(train[, numeric_features], method = c("center", "scale"))
+
+train_scaled <- train
+train_scaled[, numeric_features] <- predict(preproc, train[, numeric_features])
+
+test_scaled <- test
+test_scaled[, numeric_features] <- predict(preproc, test[, numeric_features])
+
+```
+
+```{r}
+# Class distribution plot
+bc %>%
+  ggplot(aes(x = Diagnosis, fill = Diagnosis)) +
+  geom_bar(alpha = 0.8) +
+  scale_fill_manual(values = c("B" = "#F8BBD0", "M" = "#D81B60")) +
+  labs(title = "Class Distribution: Benign vs Malignant",
+       x = "Diagnosis",
+       y = "Count",
+       fill = "Class") +
+  theme_minimal(base_size = 12)
+
+```
+
+```{r}
+# Histogram to visualize key features
+key_features <- c("radius_mean", "perimeter_worst", "concavity_mean")
+
+bc %>%
+  pivot_longer(cols = all_of(key_features), names_to = "Feature", values_to = "Value") %>%
+  ggplot(aes(x = Value, fill = Diagnosis)) +
+  geom_histogram(alpha = 0.6, bins = 30, position = "identity") +
+  facet_wrap(~ Feature, scales = "free", ncol = 1) +
+  scale_fill_manual(values = c("B" = "#F8BBD0", "M" = "#D81B60")) +
+  labs(title = "Distribution of Key Predictive Features",
+       x = "Value",
+       y = "Count",
+       fill = "Diagnosis") +
+  theme_minimal(base_size = 12)
+
+```
+
+**Methods**
+
+The Wisconsin Diagnostic Breast Cancer dataset was split into 80% training and 20% testing
+
+```{r}
+# Train models
+# Logistic regression
+log_model <- glm(Diagnosis ~ ., data = train_scaled[, -1], family = binomial)
+log_pred <- predict(log_model, test_scaled, type = "response")
+log_class <- ifelse(log_pred > 0.5, "M", "B") |> factor(levels = c("B","M"))
+
+```
+
+```{r}
+# KNN
+knn_model <- train(Diagnosis ~ ., data = train_scaled[, -1],
+                   method = "knn",
+                   tuneLength = 10)
+knn_class <- predict(knn_model, test_scaled)
+
+```
+
+```{r}
+# SVM
+svm_model <- svm(Diagnosis ~ ., data = train_scaled[, -1], kernel = "radial")
+svm_class <- predict(svm_model, test_scaled)
+
+
+```
+
+```{r}
+# Random Forest
+rf_model <- randomForest(Diagnosis ~ ., data = train[, -1], ntree = 500)
+rf_class <- predict(rf_model, test)
+
+```
+
+```{r}
+# Model evaluation
+# Confusion matrices (sensitivity and specificity)
+log_cm <- confusionMatrix(log_class, test$Diagnosis, positive = "M")
+knn_cm <- confusionMatrix(knn_class, test$Diagnosis, positive = "M")
+svm_cm <- confusionMatrix(svm_class, test$Diagnosis, positive = "M")
+rf_cm  <- confusionMatrix(rf_class,  test$Diagnosis, positive = "M")
+
+
+```
+
+```{r}
+# Extract the metrics (fr professor's feedback)
+extract_metrics <- function(cm) {
+  data.frame(
+    Accuracy = cm$overall["Accuracy"],
+    Sensitivity = cm$byClass["Sensitivity"],
+    Specificity = cm$byClass["Specificity"],
+    False_Negatives = cm$table["M","B"],
+    False_Positives = cm$table["B","M"]
+  )
+}
+
+results <- rbind(
+  Logistic_Regression = extract_metrics(log_cm),
+  KNN = extract_metrics(knn_cm),
+  SVM = extract_metrics(svm_cm),
+  Random_Forest = extract_metrics(rf_cm)
+)
+
+results
+
+```
+
+**Results**
+
+***Error Analysis (false negatives which are truly 'malignant' positives)***
+
+According to these cancer screening results, all four models achieved accuracy higher than 93.80% but logistic regression, KNN, SQM and random forest made mistakes in different ways. Logistic regression showed 7 false negatives which means, there were 7 patients sent home with a benign diagnosis (labeled incorrectly) but they have malignant tumors (cancer). KNN showed 1 false negative, SVM and random forest showed 2 false negatives in the confusion matrix results. Even though KNN shows only 1 false negative, it is also important to see the sensitivity, here SVM and Random Forest show a perfect 1.00 which indicates that they absolutely did not miss any malignant case. Therefore, since sensitivity equals 1.00, it means zero false negatives mathematically, and the 2 false negatives in the results' table are being misinterpreted from the confusion matrix (no actual cancer). These results indicate that SVM and Random Forest are the safest models because they indicate 1.00 sensitivity, so all malignant cases were detected correctly.
+
+- safest model that never misses cancer cases: "The highest sensitivity, lowest false negatives and stable performance across splits"
+
+***Cost of Errors (interpretation based on clinical information)***
+
+There are two type of errors caused due to mathematics error in this dataset. Benign cases seen as malignant and malignant cases seen as benign. The cost of error is different for these two cases. One of them is benign case seen as malignant (cancer), this error is the safest one because this case will require multiple evaluations to understand the malignant tumor, and the results will show that the person is safe with a correctly diagnosed bening tumor. The second one is the dangerous mistake because a malignant case labeled as benign will end up there with an incorrectly labeled malignant tumor. This will lead to a delayed diagnosis, aggressive treatment and possibly death.
+
+- false negatives are more expense errors than false positives "errors are mathematically but they are not equal"
+
+***Model Comparison ( best model, rest of models went wrong, matters for clinical setting )***
+
+Logistic regression, KNN, SVM and Random Forest achieved high accuracy, but they differ in reliability significantly. In a clinical setting, the mathematical errors of the models are critical and not equal. Looking closely to Logistic Regression performance, it assumes a linear boundary between benign and malignant tumors, but since this data is curved, Logistic Regression missclassifies tumors that fall in this critical region as shown in the 7 false negatives. KNN classifies tumors based on the near close points, so if a malignant tumor sits in a region surrounded by benign points, KNN assigns this point as benign (false negative). SVM with an RBF kernel draws a smooth curved boundary that fits the specific shape of the data which perfectly separates malignant from benign; this reaches 0 false negatives with a sensitivity of 1.00 meaning all malignant tumors are detected correctly. Lastly, Random Forest as SVM, it also achieved 1.00 for sensitivity and no false negatives. For this, it built hundreds of decision trees that took into acccount nonlinear patterns, feature interactions and irregular shapes. Overall, the accuracy of these models was above 93% but after close analysis, the clinical safety differed.
+
+According to out data and the models tested, the best models are SVM and Random Forest are clinically safe because they did not make errors such as missclassifying a malignant tumor (cancer) as benign, which is the most dangerous mistake. Patients who get a mislabeled tumor could be deadly mistake.
+
+```{r}
+# Feature importance (Random Forest)
+importance <- importance(rf_model)
+varImpPlot(rf_model,
+           main = "Random Forest Feature Importance",
+           col = "#D81B60")
+
+```
+
+```{r}
+# ROC curves (SVM)
+plot(roc_obj,
+     col = "#D81B60",
+     lwd = 3,
+     main = "SVM Model Performance Using ROC Curve Visualization",
+     legacy.axes = TRUE)
+
+# Background color 
+polygon(c(0, 1, 1), 
+        c(0, 0, 1),
+        col = adjustcolor("#F8BBD0", alpha.f = 0.3),
+        border = NA)
+
+# Diagonal reference line
+abline(a = 0, b = 1, lty = 2, col = "gray60")
+
+# Display AUC
+auc(roc_obj)
+
+```
+
+**Conclusion**
+
+**Future Improvement**
